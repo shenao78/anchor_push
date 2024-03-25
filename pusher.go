@@ -14,7 +14,7 @@ type Pusher struct {
 }
 
 func (p *Pusher) Start() {
-	ticker := time.NewTicker(time.Second)
+	ticker := time.NewTicker(time.Second * 5)
 	for ; true; <-ticker.C {
 		resp := &Response{}
 		if err := Get(p.URL, resp); err != nil {
