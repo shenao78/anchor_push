@@ -2,7 +2,6 @@ package anchor_push
 
 import (
 	"fmt"
-	"time"
 )
 
 type Response struct {
@@ -21,8 +20,6 @@ type Anchorage struct {
 	ArrangeAnchorTime     string `json:"arrangeAnchorTime"`
 	ArrangeMoveAnchorTime string `json:"arrangeMoveAnchorTime"`
 	PublishTimeStr        string `json:"publishTime"`
-
-	PushTime time.Time `json:"-"`
 }
 
 func (a *Anchorage) FormatMsg() string {
@@ -45,15 +42,4 @@ func (a *Anchorage) FormatMsg() string {
 		a.CbStatus,
 		a.PublishTimeStr,
 	)
-}
-
-func (a *Anchorage) fillPushTime() {
-	pushTime, _ := parseTime(a.PublishTimeStr)
-	a.PushTime = pushTime
-}
-
-func parseTime(t string) (time.Time, error) {
-	loc, _ := time.LoadLocation("Asia/Shanghai")
-	year := time.Now().Year()
-	return time.ParseInLocation("2006-01-02 15:04", fmt.Sprintf("%d-%s", year, t), loc)
 }

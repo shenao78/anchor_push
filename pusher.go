@@ -1,16 +1,17 @@
 package anchor_push
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"sort"
 	"time"
 )
 
 type Pusher struct {
-	URL            string
-	DingURL        string
-	LastPushedTime time.Time
+	URL        string
+	DingURL    string
+	lastPushed string
 }
 
 func (p *Pusher) Start() {
@@ -26,28 +27,27 @@ func (p *Pusher) Start() {
 			continue
 		}
 		anchors := resp.Data
-		for _, anchor := range anchors {
-			anchor.fillPushTime()
-		}
-		sort.Slice(anchors, func(i, j int) bool {
-			return anchors[i].PushTime.After(anchors[j].PushTime)
-		})
+
 		var pushAnchors []*Anchorage
 		for _, anchor := range anchors {
-			if !anchor.PushTime.After(p.LastPushedTime) {
+			msg := anchor.FormatMsg()
+			if p.lastPushed == msgHash(msg) {
 				break
 			}
+
 			if anchor.CbStatus == "提前离锚" || anchor.CbStatus == "用户取消" {
 				pushAnchors = append(pushAnchors, anchor)
 			}
 		}
-		for _, anchor := range pushAnchors {
-			if err := p.SendDingMsg(anchor.FormatMsg()); err != nil {
-				fmt.Println("钉钉发送失败", err)
+		if p.lastPushed != "" {
+			for _, anchor := range pushAnchors {
+				if err := p.SendDingMsg(anchor.FormatMsg()); err != nil {
+					fmt.Println("钉钉发送失败", err)
+				}
 			}
 		}
 		if len(pushAnchors) > 0 {
-			p.LastPushedTime = pushAnchors[0].PushTime
+			p.lastPushed = msgHash(pushAnchors[0].FormatMsg())
 		}
 	}
 }
@@ -68,4 +68,10 @@ func (p *Pusher) SendDingMsg(content string) error {
 	}
 	jsonMsg, _ := json.Marshal(msg)
 	return Post(p.DingURL, jsonMsg)
+}
+
+func msgHash(msg string) string {
+	sha := sha256.New()
+	sha.Write([]byte(msg))
+	return hex.EncodeToString(sha.Sum(nil))
 }
