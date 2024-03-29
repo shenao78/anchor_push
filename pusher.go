@@ -5,13 +5,14 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/scalalang2/golang-fifo/sieve"
 	"time"
 )
 
 type Pusher struct {
-	URL        string
-	DingURL    string
-	lastPushed string
+	URL     string
+	DingURL string
+	Pushed  *sieve.Sieve[string, bool]
 }
 
 func (p *Pusher) Start() {
@@ -30,24 +31,19 @@ func (p *Pusher) Start() {
 
 		var pushAnchors []*Anchorage
 		for _, anchor := range anchors {
-			msg := anchor.FormatMsg()
-			if p.lastPushed == msgHash(msg) {
-				break
-			}
-
 			if anchor.CbStatus == "提前离锚" || anchor.CbStatus == "用户取消" {
-				pushAnchors = append(pushAnchors, anchor)
-			}
-		}
-		if p.lastPushed != "" {
-			for _, anchor := range pushAnchors {
-				if err := p.SendDingMsg(anchor.FormatMsg()); err != nil {
-					fmt.Println("钉钉发送失败", err)
+				msg := anchor.FormatMsg()
+				hash := msgHash(msg)
+				if !p.Pushed.Contains(hash) {
+					pushAnchors = append(pushAnchors, anchor)
+					p.Pushed.Set(hash, true)
 				}
 			}
 		}
-		if len(pushAnchors) > 0 {
-			p.lastPushed = msgHash(pushAnchors[0].FormatMsg())
+		for _, anchor := range pushAnchors {
+			if err := p.SendDingMsg(anchor.FormatMsg()); err != nil {
+				fmt.Println("钉钉发送失败", err)
+			}
 		}
 	}
 }
@@ -73,5 +69,5 @@ func (p *Pusher) SendDingMsg(content string) error {
 func msgHash(msg string) string {
 	sha := sha256.New()
 	sha.Write([]byte(msg))
-	return hex.EncodeToString(sha.Sum(nil))
+	return hex.EncodeToString(sha.Sum(nil))[0:10]
 }

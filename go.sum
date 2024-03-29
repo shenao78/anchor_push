@@ -1,0 +1,4 @@
+github.com/patrickmn/go-cache v2.1.0+incompatible h1:HRMgzkcYKYpi3C8ajMPV8OFXaaRUnok+kx1WdO15EQc=
+github.com/patrickmn/go-cache v2.1.0+incompatible/go.mod h1:3Qf8kWWT7OJRJbdiICTKqZju1ZixQ/KpMGzzAfe6+WQ=
+github.com/scalalang2/golang-fifo v1.0.0 h1:zPd5E8ajv+JMip362jHcKwMmZ5WltkqLVcuwrdoB4Ik=
+github.com/scalalang2/golang-fifo v1.0.0/go.mod h1:xphJsXKctO3gdjDlZ8J+vhvRj3dgGly7Q8rGRxAHs6g=
