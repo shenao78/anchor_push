@@ -28,7 +28,7 @@ func (p *Pusher) Start() {
 			continue
 		}
 		anchors := resp.Data
-
+		firstPush := p.Pushed.Len() == 0
 		var pushAnchors []*Anchorage
 		for _, anchor := range anchors {
 			if anchor.CbStatus == "提前离锚" || anchor.CbStatus == "用户取消" {
@@ -40,9 +40,11 @@ func (p *Pusher) Start() {
 				}
 			}
 		}
-		for _, anchor := range pushAnchors {
-			if err := p.SendDingMsg(anchor.FormatMsg()); err != nil {
-				fmt.Println("钉钉发送失败", err)
+		if !firstPush {
+			for _, anchor := range pushAnchors {
+				if err := p.SendDingMsg(anchor.FormatMsg()); err != nil {
+					fmt.Println("钉钉发送失败", err)
+				}
 			}
 		}
 	}
