@@ -5,10 +5,16 @@ import (
 )
 
 type Response struct {
-	Status  uint64       `json:"status"`
-	Code    string       `json:"code"`
-	Success bool         `json:"success"`
-	Data    []*Anchorage `json:"data"`
+	Status  uint64   `json:"status"`
+	Code    string   `json:"code"`
+	Success bool     `json:"success"`
+	Data    PageData `json:"data"`
+}
+
+type PageData struct {
+	List    []*Anchorage `json:"list"`
+	HasMore bool         `json:"hasMore"`
+	Notice  string       `json:"notice"`
 }
 
 type Anchorage struct {
