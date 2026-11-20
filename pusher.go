@@ -26,16 +26,11 @@ func (p *Pusher) Start() {
 }
 
 func (p *Pusher) pushMsg(url string, firstPush bool) {
-	resp := &Response{}
-	if err := Get(url, resp); err != nil {
+	anchors, err := GetAllAnchorages(url)
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	if resp.Status != 200 || resp.Code != "10000" {
-		fmt.Println("获取锚地预约动态失败！")
-		return
-	}
-	anchors := resp.Data
 	var pushAnchors []*Anchorage
 	for _, anchor := range anchors {
 		if anchor.CbStatus == "提前离锚" || anchor.CbStatus == "用户取消" {
