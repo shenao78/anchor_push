@@ -2,6 +2,7 @@ package anchor_push
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -9,7 +10,10 @@ import (
 )
 
 func Get(url string, result interface{}) error {
-	client := &http.Client{Timeout: 20 * time.Second}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Timeout: 20 * time.Second, Transport: tr}
 	resp, err := client.Get(url)
 	if err != nil {
 		return err
@@ -24,13 +28,16 @@ func Get(url string, result interface{}) error {
 }
 
 func Post(url string, payload []byte) error {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{Timeout: 20 * time.Second}
+	client := &http.Client{Timeout: 20 * time.Second, Transport: tr}
 	_, err = client.Do(req)
 	return err
 }
