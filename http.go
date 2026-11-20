@@ -2,7 +2,6 @@ package anchor_push
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -59,16 +58,13 @@ func GetAllAnchorages(rawURL string) ([]*Anchorage, error) {
 }
 
 func Post(url string, payload []byte) error {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{Timeout: 20 * time.Second, Transport: tr}
+	client := &http.Client{Timeout: 20 * time.Second}
 	_, err = client.Do(req)
 	return err
 }
